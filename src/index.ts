@@ -1,13 +1,13 @@
-// 🛸 server
+
 import { execute, subscribe } from "graphql";
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import { useServer } from "graphql-ws/lib/use/ws";
-import { WebSocketServer } from "ws"; // yarn add ws
-// import { PubSub } from "graphql-subscriptions";
+import { WebSocketServer } from "ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import gql from "gql-tag";
 
+// import { PubSub } from "graphql-subscriptions";
 import "./shutdown";
 
 // schema and resolvers
@@ -37,7 +37,6 @@ const schema = makeExecutableSchema({
 
             return {
               async next() {
-                console.log('nexting');
                 return new Promise((resolve, reject) => {
                   setTimeout(() => {
                     value++;
@@ -61,10 +60,8 @@ const schema = makeExecutableSchema({
             };
           },
         }),
-        //pubsub.asyncIterator(["NUMBER_INCREMENTED"]),
       },
 
-      // generators
       hi: {
         subscribe: async function* sayHi() {
           for (const hi of [
@@ -84,17 +81,14 @@ const schema = makeExecutableSchema({
   },
 });
 
-// app server
 const app = express();
 app.use("/graphql", graphqlHTTP({ schema }));
 app.use("/", express.static("public"));
-app.get(`/health-graphql-subscriptions`, (_, res) => {
+app.get(`/health`, (_, res) => {
   return res.status(200).send("ok");
 });
 
 app.listen(8300, () => {
-  // create and use the websocket server
-
   const wsServer = new WebSocketServer({
     port: 8350,
     path: "/graphql",
@@ -107,7 +101,7 @@ app.listen(8300, () => {
       subscribe,
 
       onConnect: (ctx) => {
-        // console.log("Connect", ctx);
+        console.log("Connect", ctx);
 
         // if (!(await isTokenValid(ctx.connectionParams?.token)))
         // // returning false from the onConnect callback will close with `4403: Forbidden`;
