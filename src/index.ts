@@ -7,29 +7,51 @@ import { WebSocketServer } from "ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import gql from "gql-tag";
 
-// import { PubSub } from "graphql-subscriptions";
+import { PubSub } from "graphql-subscriptions";
 import "./shutdown";
+
+const pubsub = new PubSub();
 
 // schema and resolvers
 const schema = makeExecutableSchema({
   typeDefs: gql`
     type Query {
       hello: String
-      currentNumber: Int
     }
     type Subscription {
       hi: String
       numberIncremented: Int
+      timePubSub: String
+
+      onApiaryAdded: ApiaryEvent
+    }
+
+    type ApiaryEvent{
+      id: String
+      name: String
     }
   `,
   resolvers: {
     Query: {
       hello: () => "Hello World!",
-      currentNumber() {
-        return currentNumber;
-      },
     },
     Subscription: {
+      hi: {
+        subscribe: async function* sayHi() {
+          for (const hi of [
+            "Hi",
+            "Привет",
+            "Bonjour",
+            "Hola",
+            "Ciao",
+            "Zdravo",
+          ]) {
+            yield new Promise((resolve) => setTimeout(resolve, 2000));
+            yield { hi };
+          }
+        },
+      },
+
       numberIncremented: {
         subscribe: () => ({
           [Symbol.asyncIterator]() {
@@ -62,24 +84,19 @@ const schema = makeExecutableSchema({
         }),
       },
 
-      hi: {
-        subscribe: async function* sayHi() {
-          for (const hi of [
-            "Hi",
-            "Привет",
-            "Bonjour",
-            "Hola",
-            "Ciao",
-            "Zdravo",
-          ]) {
-            yield new Promise((resolve) => setTimeout(resolve, 2000));
-            yield { hi };
-          }
-        },
-      },
+      timePubSub: {
+        subscribe: ()=> pubsub.asyncIterator("TIME"),
+      }
     },
   },
 });
+
+function publishTime() {
+  pubsub.publish("TIME", { timePubSub: (new Date()).toISOString() });
+  setTimeout(publishTime, 1000);
+}
+publishTime();
+
 
 const app = express();
 app.use("/graphql", graphqlHTTP({ schema }));
@@ -126,15 +143,3 @@ app.listen(8300, () => {
     wsServer
   );
 });
-
-// In the background, increment a number every second and notify subscribers when
-// it changes.
-// const pubsub = new PubSub();
-let currentNumber = 0;
-function incrementNumber() {
-  currentNumber++;
-  // pubsub.publish("NUMBER_INCREMENTED", { numberIncremented: currentNumber });
-  setTimeout(incrementNumber, 1000);
-}
-// Start incrementing
-incrementNumber();
