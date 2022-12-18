@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  weather:
+    build: .
+    command:
+      node dist/index.js.js
+    ports:
+      - 8300:8300
+      - 8350:8350
+    volumes:
+      - .:/app/
+    restart: always
+    environment:
+      - ENV_ID=dev
+    network_mode: bridge
+    networks:
+      - gratheon
+networks:
+  gratheon:

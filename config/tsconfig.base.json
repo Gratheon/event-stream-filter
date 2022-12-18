@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "module": "CommonJS",
+      "noImplicitAny": false,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "esModuleInterop": true,
+      "strict": true,
+      "outDir": "../dist",
+      "sourceMap": true,
+      "allowJs": true
+    }
+  }
