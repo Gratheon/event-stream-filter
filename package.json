@@ -16,8 +16,10 @@
     "gql-tag": "^1.0.1",
     "graphiql": "2.2.0",
     "graphql": "^15.3.0",
+    "graphql-redis-subscriptions": "^2.6.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "5.11.2",
+    "ioredis": "^5.2.4",
     "lodash": "4.17.21",
     "ws": "8.11.0"
   },
