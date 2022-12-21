@@ -1,7 +1,7 @@
 start:
 	COMPOSE_PROJECT_NAME=gratheon docker compose -f docker-compose.dev.yml up -d
-run:
-	ENV_ID=dev npm run dev
+develop:
+	ENV_ID=dev NATIVE=1 npm run start
 
 deploy-clean:
 	ssh root@gratheon.com 'rm -rf /www/subscribe.gratheon.com/dist/*;'

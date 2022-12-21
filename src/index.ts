@@ -20,7 +20,7 @@ const pubsub = new PubSub();
 const redisPubSub = new RedisPubSub({
   subscriber: new Redis({
     port: 6379,
-    host: "127.0.0.1",
+    host: process.env.NATIVE === "1" ? "127.0.0.1" : "redis",
     username: "default",
     password: "pass",
     showFriendlyErrorStack: true,
@@ -120,7 +120,7 @@ const schema = makeExecutableSchema({
         subscribe: withFilter(
           () => redisPubSub.asyncIterator('apiary'),
           (payload, variables) => {
-            return payload.id > 0.5;
+            return true;
           },
         ),
         resolve: (rawPayload, _, ctx, info) => {
@@ -182,7 +182,6 @@ app.listen(8300, () => {
 function publishTime() {
   pubsub.publish("TIME", { timePubSub: (new Date()).toISOString() });
 
-  redisPubSub.publish("apiary", {id:Math.random(), name: Math.random()})
   setTimeout(publishTime, 1000);
 }
 publishTime();
