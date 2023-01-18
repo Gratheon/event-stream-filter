@@ -6,8 +6,6 @@ import { WebSocketServer } from "ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import gql from "gql-tag";
 
-import { PubSub } from "graphql-subscriptions";
-
 import { withFilter } from "graphql-subscriptions";
 import { RedisPubSub } from "graphql-redis-subscriptions";
 import Redis from "ioredis";
