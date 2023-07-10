@@ -7,45 +7,30 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import gql from "gql-tag";
 
 import { withFilter } from "graphql-subscriptions";
-import { RedisPubSub } from "graphql-redis-subscriptions";
-import Redis from "ioredis";
-
 import { getUserIdByToken } from "./auth";
 import "./shutdown";
-
-const redisPubSub = new RedisPubSub({
-  subscriber: new Redis({
-    port: 6379,
-    host: process.env.NATIVE === "1" ? "127.0.0.1" : "redis",
-    username: "default",
-    password: "pass",
-    showFriendlyErrorStack: true,
-    db: 0,
-
-    enableReadyCheck: true,
-    autoResubscribe: true,
-    retryStrategy: (times) => {
-      return Math.min(times * 500, 5000);
-    },
-  }),
-  publisher: new Redis({
-    port: 6379,
-    host: process.env.NATIVE === "1" ? "127.0.0.1" : "redis",
-    username: "default",
-    password: "pass",
-  }),
-});
+import redisPubSub from './redisPubSub'
 
 // schema and resolvers
 const schema = makeExecutableSchema({
   typeDefs: gql`
+    scalar JSON
     type Query {
       hello: String
     }
     type Subscription {
       onApiaryUpdated: ApiaryEvent
+      onFrameSideBeesPartiallyDetected(frameSideId: String): BeesDetectedEvent
+      onFrameSideResourcesDetected(frameSideId: String): FrameResourcesDetectedEvent
     }
 
+    type BeesDetectedEvent{
+      delta: JSON
+    }
+    type FrameResourcesDetectedEvent{
+      delta: JSON
+    }
+    
     type ApiaryEvent {
       id: String
       name: String
@@ -56,19 +41,36 @@ const schema = makeExecutableSchema({
       hello: () => "Hello World!",
     },
     Subscription: {
+      onFrameSideBeesPartiallyDetected: {
+        subscribe: withFilter(
+          (_, {frameSideId}, ctx) => {
+            console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.bees_partially_detected`)
+            return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.bees_partially_detected`);
+          },
+          (payload, variables) => true
+        ),
+        resolve: (rawPayload) => rawPayload
+      },
+      onFrameSideResourcesDetected: {
+        subscribe: withFilter(
+          (_, {frameSideId}, ctx) => {
+            console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`)
+            return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`);
+          },
+          (payload, variables) => true
+        ),
+        resolve: (rawPayload) => rawPayload
+      },
+
       onApiaryUpdated: {
         subscribe: withFilter(
-            (_,__,ctx) => {
-              console.log(`subscribing to ${ctx.uid}.apiary`)
-              return redisPubSub.asyncIterator(`${ctx.uid}.apiary`);
-            },
-            (payload, variables) => {
-              return true;
-            }
-          ),
-        resolve: (rawPayload, _, ctx, info) => {
-          return rawPayload;
-        },
+          (_, __, ctx) => {
+            console.log(`subscribing to ${ctx.uid}.apiary`)
+            return redisPubSub.asyncIterator(`${ctx.uid}.apiary`);
+          },
+          (payload, variables) => true
+        ),
+        resolve: (rawPayload) => rawPayload
       },
     },
   },

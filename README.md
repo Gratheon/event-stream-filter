@@ -9,8 +9,7 @@ flowchart LR
     web-app("<a href='https://github.com/Gratheon/web-app'>web-app</a>") --> graphql-router
     web-app --"subscribe to events"--> event-stream-filter("<a href='https://github.com/Gratheon/event-stream-filter'>event-stream-filter</a>") --> redis
     
-    graphql-router --> swarm-api("<a href='https://github.com/Gratheon/swarm-api'>swarm-api</a>") --> redis[("<a href='https://github.com/Gratheon/redis'>redis pub-sub</a>")]
-    
+    graphql-router --> swarm-api("<a href='https://github.com/Gratheon/swarm-api'>swarm-api</a>") --{uid}.apiary.updated--> redis[("<a href='https://github.com/Gratheon/redis'>redis pub-sub</a>")]    
 ```
 
 ## URLs
