@@ -48,11 +48,14 @@
       type="application/javascript"
     ></script>
     <script>
+      function isProd(){
+        return window.location.hostname === 'subscribe.gratheon.com'
+      }
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: GraphiQL.createFetcher({
-            url: 'http://localhost:8300/graphql',
-            subscriptionUrl: 'ws://localhost:8350/graphql',
+            url: isProd() ? 'https://graphql.gratheon.com/graphql' : 'http://localhost:8300/graphql',
+            subscriptionUrl: isProd() ? 'wss://subscribe.gratheon.com/graphql' :'ws://localhost:8350/graphql',
           }),
           defaultEditorToolsVisibility: true,
         }),

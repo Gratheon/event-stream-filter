@@ -4,6 +4,8 @@ services:
     build: .
     command:
       node dist/index.js
+    environment:
+      - ENV_ID=prod
     ports:
       - 8300:8300
       - 8350:8350
