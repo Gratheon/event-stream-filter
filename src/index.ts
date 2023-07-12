@@ -5,11 +5,35 @@ import { useServer } from "graphql-ws/lib/use/ws";
 import { WebSocketServer } from "ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import gql from "gql-tag";
-
 import { withFilter } from "graphql-subscriptions";
+import * as Sentry from "@sentry/node";
+
 import { getUserIdByToken } from "./auth";
 import "./shutdown";
 import redisPubSub from './redisPubSub'
+import config from './config'
+
+const app = express();
+
+Sentry.init({
+  dsn: config.sentryDsn,
+  environment: process.env.ENV_ID,
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Sentry.Integrations.Express({
+      // to trace all requests to the default router
+      app,
+      // alternatively, you can specify the routes you want to trace:
+      // router: someRouter,
+    }),
+  ],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
 
 // schema and resolvers
 const schema = makeExecutableSchema({
@@ -76,7 +100,7 @@ const schema = makeExecutableSchema({
   },
 });
 
-const app = express();
+app.use(Sentry.Handlers.errorHandler());
 app.use("/graphql", graphqlHTTP({ schema }));
 app.use("/", express.static("public"));
 app.get(`/health`, (_, res) => {
