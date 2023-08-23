@@ -1,9 +1,10 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
-USER nobody
-
-# ensure all directories exist
 WORKDIR /app
+
+COPY . /app/
+RUN npm install
+RUN npm run build
 
 EXPOSE 4000
 

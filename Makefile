@@ -2,8 +2,7 @@ start:
 	# nvm use
 	npm i
 	npm run build
-	COMPOSE_PROJECT_NAME=gratheon docker compose -f docker-compose.dev.yml up
-	docker ps | grep event-stream-filter
+	COMPOSE_PROJECT_NAME=gratheon docker compose -f docker-compose.dev.yml up --build -d
 stop:
 	COMPOSE_PROJECT_NAME=gratheon docker compose -f docker-compose.dev.yml down
 develop:
