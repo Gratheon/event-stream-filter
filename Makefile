@@ -9,15 +9,15 @@ develop:
 	ENV_ID=dev NATIVE=1 npm run start
 
 deploy-clean:
-	ssh root@gratheon.com 'rm -rf /www/subscribe.gratheon.com/dist/*;'
+	ssh root@gratheon.com 'rm -rf /www/event-stream-filter/dist/*;'
 
 deploy-copy:
-	scp -r package.json package-lock.json Dockerfile .version docker-compose.yml restart.sh root@gratheon.com:/www/subscribe.gratheon.com/
-	rsync -av -e ssh --exclude='node_modules' --exclude='.git'  --exclude='.idea' ./ root@gratheon.com:/www/subscribe.gratheon.com/
+	scp -r package.json package-lock.json Dockerfile .version docker-compose.yml restart.sh root@gratheon.com:/www/event-stream-filter/
+	rsync -av -e ssh --exclude='node_modules' --exclude='.git'  --exclude='.idea' ./ root@gratheon.com:/www/event-stream-filter/
 
 deploy-run:
-	ssh root@gratheon.com 'chmod +x /www/subscribe.gratheon.com/restart.sh'
-	ssh root@gratheon.com 'bash /www/subscribe.gratheon.com/restart.sh'
+	ssh root@gratheon.com 'chmod +x /www/event-stream-filter/restart.sh'
+	ssh root@gratheon.com 'bash /www/event-stream-filter/restart.sh'
 
 deploy:
 	git rev-parse --short HEAD > .version
