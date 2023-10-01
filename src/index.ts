@@ -46,12 +46,16 @@ const schema = makeExecutableSchema({
       onApiaryUpdated: ApiaryEvent
       onFrameSideBeesPartiallyDetected(frameSideId: String): BeesDetectedEvent
       onFrameSideResourcesDetected(frameSideId: String): FrameResourcesDetectedEvent
+      onFrameQueenCupsDetected(frameSideId: String): QueenCupsDetectedEvent
     }
 
     type BeesDetectedEvent{
       delta: JSON
     }
     type FrameResourcesDetectedEvent{
+      delta: JSON
+    }
+    type QueenCupsDetectedEvent{
       delta: JSON
     }
     
@@ -80,6 +84,16 @@ const schema = makeExecutableSchema({
           (_, {frameSideId}, ctx) => {
             console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`)
             return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`);
+          },
+          (payload, variables) => true
+        ),
+        resolve: (rawPayload) => rawPayload
+      },
+      onFrameQueenCupsDetected: {
+        subscribe: withFilter(
+          (_, {frameSideId}, ctx) => {
+            console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.queen_cups_detected`)
+            return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.queen_cups_detected`);
           },
           (payload, variables) => true
         ),
