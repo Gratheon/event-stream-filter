@@ -1,15 +1,15 @@
 version: '3.9'
 services:
   event-stream-filter:
-    image: local/event-stream-filter
-    # build: .
-    # command:
-    #   node dist/index.js
+    build: 
+      dockerfile: Dockerfile.dev
+    command:
+      node dist/index.js
     ports:
       - 8300:8300
       - 8350:8350
-    # volumes:
-    #   - .:/app/
+    volumes:
+      - .:/app/
     restart: always
     environment:
       - ENV_ID=dev

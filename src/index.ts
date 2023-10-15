@@ -51,10 +51,16 @@ const schema = makeExecutableSchema({
 
     type BeesDetectedEvent{
       delta: JSON
+      detectedQueenCount: Int
+      detectedWorkerBeeCount: Int
+      detectedDroneCount: Int
+      isBeeDetectionComplete: Boolean
     }
+
     type FrameResourcesDetectedEvent{
       delta: JSON
     }
+
     type QueenCupsDetectedEvent{
       delta: JSON
     }
@@ -71,17 +77,20 @@ const schema = makeExecutableSchema({
     Subscription: {
       onFrameSideBeesPartiallyDetected: {
         subscribe: withFilter(
-          (_, {frameSideId}, ctx) => {
+          (_, { frameSideId }, ctx) => {
             console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.bees_partially_detected`)
             return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.bees_partially_detected`);
           },
           (payload, variables) => true
         ),
-        resolve: (rawPayload) => rawPayload
+        resolve: (rawPayload) => {
+          console.log("forwarding onFrameSideBeesPartiallyDetected:", rawPayload)
+          return rawPayload
+        }
       },
       onFrameSideResourcesDetected: {
         subscribe: withFilter(
-          (_, {frameSideId}, ctx) => {
+          (_, { frameSideId }, ctx) => {
             console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`)
             return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.frame_resources_detected`);
           },
@@ -91,7 +100,7 @@ const schema = makeExecutableSchema({
       },
       onFrameQueenCupsDetected: {
         subscribe: withFilter(
-          (_, {frameSideId}, ctx) => {
+          (_, { frameSideId }, ctx) => {
             console.log(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.queen_cups_detected`)
             return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.queen_cups_detected`);
           },

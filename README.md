@@ -29,5 +29,5 @@ npm run start
 
 Run with docker:
 ```sh
-docker compose -f docker-compose.dev.yml up
+make start
 ```
