@@ -59,10 +59,18 @@ const schema = makeExecutableSchema({
 
     type FrameResourcesDetectedEvent{
       delta: JSON
+      isCellsDetectionComplete: Boolean
+      
+      broodPercent: Int
+      cappedBroodPercent: Int
+      eggsPercent: Int
+      pollenPercent: Int
+      honeyPercent: Int
     }
 
     type QueenCupsDetectedEvent{
       delta: JSON
+      isQueenCupsDetectionComplete: Boolean
     }
     
     type ApiaryEvent {
@@ -83,10 +91,7 @@ const schema = makeExecutableSchema({
           },
           (payload, variables) => true
         ),
-        resolve: (rawPayload) => {
-          console.log("forwarding onFrameSideBeesPartiallyDetected:", rawPayload)
-          return rawPayload
-        }
+        resolve: (rawPayload) => rawPayload
       },
       onFrameSideResourcesDetected: {
         subscribe: withFilter(
