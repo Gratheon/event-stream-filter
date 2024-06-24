@@ -46,6 +46,7 @@ const schema = makeExecutableSchema({
       onApiaryUpdated: ApiaryEvent
       onFrameSideBeesPartiallyDetected(frameSideId: String): BeesDetectedEvent
       onFrameSideResourcesDetected(frameSideId: String): FrameResourcesDetectedEvent
+      onHiveFrameSideCellsDetected(hiveId: String): FrameResourcesDetectedEvent
       onFrameQueenCupsDetected(frameSideId: String): QueenCupsDetectedEvent
     }
 
@@ -60,6 +61,7 @@ const schema = makeExecutableSchema({
     type FrameResourcesDetectedEvent{
       delta: JSON
       isCellsDetectionComplete: Boolean
+      frameSideId: String
       
       broodPercent: Int
       cappedBroodPercent: Int
@@ -93,6 +95,7 @@ const schema = makeExecutableSchema({
         ),
         resolve: (rawPayload) => rawPayload
       },
+
       onFrameSideResourcesDetected: {
         subscribe: withFilter(
           (_, { frameSideId }, ctx) => {
@@ -103,6 +106,18 @@ const schema = makeExecutableSchema({
         ),
         resolve: (rawPayload) => rawPayload
       },
+
+      onHiveFrameSideCellsDetected: {
+        subscribe: withFilter(
+          (_, { hiveId }, ctx) => {
+            console.log(`subscribing to ${ctx.uid}.hive.${hiveId}.frame_resources_detected`)
+            return redisPubSub.asyncIterator(`${ctx.uid}.hive.${hiveId}.frame_resources_detected`);
+          },
+          (payload, variables) => true
+        ),
+        resolve: (rawPayload) => rawPayload
+      },
+
       onFrameQueenCupsDetected: {
         subscribe: withFilter(
           (_, { frameSideId }, ctx) => {
