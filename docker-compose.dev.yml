@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   event-stream-filter:
     build: 
@@ -13,8 +12,3 @@ services:
     restart: always
     environment:
       - ENV_ID=dev
-    network_mode: bridge
-    networks:
-      - gratheon
-networks:
-  gratheon:
