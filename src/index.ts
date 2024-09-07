@@ -152,7 +152,7 @@ app.get(`/health`, (_, res) => {
     return res.status(200).send("ok");
 });
 
-console.log("Listening on port 8300");
+logger.info("⛲️ Listening on port 8300");
 app.listen(8300, () => {
     const wsServer = new WebSocketServer({
         port: 8350,

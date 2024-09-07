@@ -1,4 +1,4 @@
-# gratheon / event-stream-filter
+# ⛲️ gratheon / event-stream-filter
 A service that streams backend events to the frontend over websocket protocol using GraphQL notation and filtering based on graphql subscriptions.
 
 
