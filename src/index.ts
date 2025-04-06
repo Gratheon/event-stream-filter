@@ -50,6 +50,7 @@ const schema = makeExecutableSchema({
       onFrameSideResourcesDetected(frameSideId: String): FrameResourcesDetectedEvent
       onHiveFrameSideCellsDetected(hiveId: String): FrameResourcesDetectedEvent
       onFrameQueenCupsDetected(frameSideId: String): QueenCupsDetectedEvent
+      onFrameQueenDetected(frameSideId: String): QueenDetectedEvent
     }
 
     type BeesDetectedEvent{
@@ -76,6 +77,14 @@ const schema = makeExecutableSchema({
       delta: JSON
       isQueenCupsDetectionComplete: Boolean
     }
+
+    # Added type for queen detection event
+    type QueenDetectedEvent{
+      delta: JSON
+      isQueenDetectionComplete: Boolean
+    }
+
+    # Removed QueenConfirmationEvent type
     
     type ApiaryEvent {
       id: String
@@ -130,6 +139,20 @@ const schema = makeExecutableSchema({
                 ),
                 resolve: (rawPayload) => rawPayload
             },
+
+            // Added resolver for queen detection
+            onFrameQueenDetected: {
+                subscribe: withFilter(
+                    (_, {frameSideId}, ctx) => {
+                        logger.debug(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.queens_detected`)
+                        return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.queens_detected`);
+                    },
+                    (payload, variables) => true
+                ),
+                resolve: (rawPayload) => rawPayload
+            },
+
+            // Removed resolver for onQueenConfirmationUpdated
 
             onApiaryUpdated: {
                 subscribe: withFilter(
