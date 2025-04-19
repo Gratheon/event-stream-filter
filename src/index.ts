@@ -51,6 +51,7 @@ const schema = makeExecutableSchema({
       onHiveFrameSideCellsDetected(hiveId: String): FrameResourcesDetectedEvent
       onFrameQueenCupsDetected(frameSideId: String): QueenCupsDetectedEvent
       onFrameQueenDetected(frameSideId: String): QueenDetectedEvent
+      onFrameVarroaDetected(frameSideId: String): VarroaDetectedEvent # Added Varroa subscription
     }
 
     type BeesDetectedEvent{
@@ -82,6 +83,13 @@ const schema = makeExecutableSchema({
     type QueenDetectedEvent{
       delta: JSON
       isQueenDetectionComplete: Boolean
+    }
+
+    # Added type for varroa detection event
+    type VarroaDetectedEvent {
+      delta: JSON
+      isVarroaDetectionComplete: Boolean
+      varroaCount: Int
     }
 
     # Removed QueenConfirmationEvent type
@@ -146,6 +154,18 @@ const schema = makeExecutableSchema({
                     (_, {frameSideId}, ctx) => {
                         logger.debug(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.queens_detected`)
                         return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.queens_detected`);
+                    },
+                    (payload, variables) => true
+                ),
+                resolve: (rawPayload) => rawPayload
+            },
+
+            // Added resolver for varroa detection
+            onFrameVarroaDetected: {
+                subscribe: withFilter(
+                    (_, {frameSideId}, ctx) => {
+                        logger.debug(`subscribing to ${ctx.uid}.frame_side.${frameSideId}.varroa_detected`)
+                        return redisPubSub.asyncIterator(`${ctx.uid}.frame_side.${frameSideId}.varroa_detected`);
                     },
                     (payload, variables) => true
                 ),
