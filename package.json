@@ -10,7 +10,7 @@
   "author": "",
   "license": "AGPL",
   "dependencies": {
-    "@graphql-tools/schema": "9.0.12",
+    "@graphql-tools/schema": "9.0.19",
     "@sentry/node": "^7.57.0",
     "express": "4.18.2",
     "express-graphql": "0.12.0",
