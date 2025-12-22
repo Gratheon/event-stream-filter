@@ -3,12 +3,13 @@ services:
     build: 
       dockerfile: Dockerfile.dev
     command:
-      node dist/index.js
+      npm start
     ports:
       - 8300:8300
       - 8350:8350
     volumes:
       - .:/app/
+      - /app/node_modules
     restart: always
     environment:
       - ENV_ID=dev
