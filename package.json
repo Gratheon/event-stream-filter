@@ -16,7 +16,7 @@
     "express-graphql": "0.12.0",
     "fast-safe-stringify": "^2.1.1",
     "gql-tag": "1.0.1",
-    "graphiql": "2.2.0",
+    "graphiql": "3.0.0",
     "graphql": "15.7.2",
     "graphql-redis-subscriptions": "2.6.0",
     "graphql-subscriptions": "2.0.0",
