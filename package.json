@@ -11,7 +11,7 @@
   "license": "AGPL",
   "dependencies": {
     "@graphql-tools/schema": "9.0.12",
-    "@sentry/node": "^7.57.0",
+    "@sentry/node": "^7.120.3",
     "express": "4.18.2",
     "express-graphql": "0.12.0",
     "fast-safe-stringify": "^2.1.1",
