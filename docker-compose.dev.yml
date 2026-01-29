@@ -13,3 +13,4 @@ services:
     restart: always
     environment:
       - ENV_ID=dev
+      - LOG_LEVEL=info

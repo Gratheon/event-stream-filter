@@ -1,7 +1,22 @@
 import jsonStringify from 'fast-safe-stringify'
+import config from '../config'
 
+const LOG_LEVELS = {
+    debug: 0,
+    info: 1,
+    warn: 2,
+    error: 3
+};
+
+const currentLogLevel = LOG_LEVELS[config.logLevel as keyof typeof LOG_LEVELS] ?? LOG_LEVELS.info;
 
 function log(level: string, message: string, meta?: any) {
+    // Skip logging if current log level is higher than message level
+    const messageLevel = LOG_LEVELS[level as keyof typeof LOG_LEVELS];
+    if (messageLevel < currentLogLevel) {
+        return;
+    }
+
     let time = new Date().toISOString();
     let hhMMTime = time.slice(11, 19);
     // colorize time to have ansi blue color
