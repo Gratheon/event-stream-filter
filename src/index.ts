@@ -231,16 +231,31 @@ app.listen(8300, () => {
             onConnect: async (ctx) => {
                 // // returning false from the onConnect callback will close with `4403: Forbidden`;
                 // // therefore, being synonymous to ctx.extra.socket.close(4403, 'Forbidden');
-                const uid = await getUserIdByToken(
-                    ctx.connectionParams?.token as string
-                );
+                try {
+                    const token = ctx.connectionParams?.token as string;
+                    
+                    if (!token) {
+                        logger.error('WebSocket connection rejected: No authentication token provided in connection params');
+                        return false;
+                    }
 
-                if (!uid) {
+                    const uid = await getUserIdByToken(token);
+
+                    if (!uid) {
+                        logger.error('WebSocket connection rejected: getUserIdByToken returned empty user ID');
+                        return false;
+                    }
+
+                    logger.debug('WebSocket connection authenticated', { uid });
+                    //@ts-ignore
+                    ctx.uid = uid;
+                } catch (error: any) {
+                    logger.errorEnriched('WebSocket connection failed during authentication', error, {
+                        hasConnectionParams: !!ctx.connectionParams,
+                        hasToken: !!ctx.connectionParams?.token
+                    });
                     return false;
                 }
-
-                //@ts-ignore
-                ctx.uid = uid;
             },
 
 
