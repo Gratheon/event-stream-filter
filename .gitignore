@@ -2,3 +2,6 @@ node_modules
 dist
 src/config/config.dev.ts
 src/config/config.prod.ts
+
+# macOS
+.DS_Store
