@@ -3,5 +3,9 @@ dist
 src/config/config.dev.ts
 src/config/config.prod.ts
 
+# Test coverage
+coverage
+*.lcov
+
 # macOS
 .DS_Store

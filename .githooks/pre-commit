@@ -1,0 +1,37 @@
+#!/bin/sh
+# Pre-commit hook for lightweight checks
+# This runs before each commit to catch issues early
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if npm is available
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is not installed. Please install Node.js and npm."
+    exit 1
+fi
+
+# Run TypeScript type checking
+echo "📝 Running TypeScript type checking..."
+npm run lint --silent
+if [ $? -ne 0 ]; then
+    echo "❌ TypeScript type checking failed. Please fix the errors before committing."
+    exit 1
+fi
+
+# Run tests for staged files
+echo "🧪 Running tests..."
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|js)$' || true)
+
+if [ -n "$STAGED_FILES" ]; then
+    # Run tests related to changed files
+    npm test -- --bail --findRelatedTests $STAGED_FILES --passWithNoTests
+    if [ $? -ne 0 ]; then
+        echo "❌ Tests failed. Please fix the tests before committing."
+        exit 1
+    fi
+else
+    echo "ℹ️  No TypeScript/JavaScript files staged, skipping tests."
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

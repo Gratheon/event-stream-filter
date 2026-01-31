@@ -13,14 +13,14 @@ export async function getUserIdByToken(token: string): Promise<string> {
   }
 
   try {
-    const decoded: { user_id: string } = await (new Promise((resolve, reject) => jwt.verify(
+    const decoded = await (new Promise<{ user_id: string }>((resolve, reject) => jwt.verify(
       token,
       config.privateKey,
       function (err, decoded) {
         if (err) {
           reject(err);
         }
-        resolve(decoded);
+        resolve(decoded as { user_id: string });
       })));
 
     if (!decoded?.user_id) {
