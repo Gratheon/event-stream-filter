@@ -1,81 +1,11 @@
-import jsonStringify from 'fast-safe-stringify'
-import config from '../config'
+import { createLogger } from '@gratheon/log-lib';
+import config from '../config';
 
-const LOG_LEVELS = {
-    debug: 0,
-    info: 1,
-    warn: 2,
-    error: 3
-};
-
-const currentLogLevel = LOG_LEVELS[config.logLevel as keyof typeof LOG_LEVELS] ?? LOG_LEVELS.info;
-
-function log(level: string, message: string, meta?: any) {
-    // Skip logging if current log level is higher than message level
-    const messageLevel = LOG_LEVELS[level as keyof typeof LOG_LEVELS];
-    if (messageLevel < currentLogLevel) {
-        return;
-    }
-
-    let time = new Date().toISOString();
-    let hhMMTime = time.slice(11, 19);
-    // colorize time to have ansi blue color
-    hhMMTime = `\x1b[34m${hhMMTime}\x1b[0m`;
-
-    // colorize level to have ansi red color for errors
-    meta = meta ? jsonStringify(meta) : ''
-
-    if (level === 'error') {
-        level = `\x1b[31m${level}\x1b[0m`;
-        meta = `\x1b[35m${meta}\x1b[0m`;
-    } else if (level === 'info') {
-        level = `\x1b[32m${level}\x1b[0m`;
-        meta = `\x1b[35m${meta}\x1b[0m`;
-    } else if (level === 'debug') {
-        level = `\x1b[90m${level}\x1b[0m`;
-        message = `\x1b[90m${message}\x1b[0m`;
-        meta = `\x1b[90m${meta}\x1b[0m`;
-    } else if (level === 'warn') {
-        level = `\x1b[33m${level}\x1b[0m`;
-        meta = `\x1b[35m${meta}\x1b[0m`;
-    }
-
-    console.log(`${hhMMTime} [${level}]: ${message} ${meta}`);
-}
-
-export const logger = {
-    info: (message: string, meta?: any) => {
-        log('info', message, meta)
-    },
-    error: (message: string | Error | any, meta?: any) => {
-        if (message.message && message.stack) {
-            return log('error', message.message, {
-                stack: message.stack,
-                ...meta
-            });
-        }
-        log('error', String(message), meta)
-    },
-    errorEnriched: (message: string, error: Error|any, meta?: any) => {
-        if (error.message && error.stack) {
-            return log('error', `${message}: ${error.message}`, {
-                stack: error.stack,
-                ...meta
-            });
-        }
-        log('error', String(message), meta)
-    },
-    warn: (message: string, meta?: any) => {
-        log('warn', message, meta)
-    },
-
-    // do not store debug logs in DB
-    debug: (message: string, meta?: any) => {
-        log('debug', message, meta)
-    },
-};
-
-
-process.on('uncaughtException', function (err) {
-    console.log("UncaughtException processing: %s", err);
+// Create logger with log level from config
+// MySQL is not configured since event-stream-filter doesn't need database persistence
+const { logger } = createLogger({
+    logLevel: config.logLevel as 'debug' | 'info' | 'warn' | 'error'
 });
+
+export { logger };
+
