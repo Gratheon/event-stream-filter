@@ -14,6 +14,9 @@ import "./shutdown";
 import redisPubSub from './redisPubSub'
 import config from './config'
 import {logger} from "./logger";
+import { subscriptionTypeDefs } from "./subscription-schema";
+import { registerSubscriptions } from "./schema-registry";
+import { publishSubscriptionUsage } from "./usage-publisher";
 
 const app = express();
 
@@ -39,75 +42,7 @@ Sentry.init({
 
 // schema and resolvers
 const schema = makeExecutableSchema({
-    typeDefs: gql`
-    scalar JSON
-    type Query {
-      hello: String
-    }
-    type Subscription {
-      onApiaryUpdated: ApiaryEvent
-      onFrameSideBeesPartiallyDetected(frameSideId: String): BeesDetectedEvent
-      onFrameSideResourcesDetected(frameSideId: String): FrameResourcesDetectedEvent
-      onHiveFrameSideCellsDetected(hiveId: String): FrameResourcesDetectedEvent
-      onFrameQueenCupsDetected(frameSideId: String): QueenCupsDetectedEvent
-      onFrameQueenDetected(frameSideId: String): QueenDetectedEvent
-      onFrameVarroaDetected(frameSideId: String): VarroaDetectedEvent # Added Varroa subscription
-      onBoxVarroaDetected(boxId: String): BoxVarroaDetectedEvent # Added Box Varroa subscription
-    }
-
-    type BeesDetectedEvent{
-      delta: JSON
-      detectedQueenCount: Int
-      detectedWorkerBeeCount: Int
-      detectedDroneCount: Int
-      isBeeDetectionComplete: Boolean
-    }
-
-    type FrameResourcesDetectedEvent{
-      delta: JSON
-      isCellsDetectionComplete: Boolean
-      frameSideId: String
-      
-      broodPercent: Int
-      cappedBroodPercent: Int
-      eggsPercent: Int
-      pollenPercent: Int
-      honeyPercent: Int
-    }
-
-    type QueenCupsDetectedEvent{
-      delta: JSON
-      isQueenCupsDetectionComplete: Boolean
-    }
-
-    # Added type for queen detection event
-    type QueenDetectedEvent{
-      delta: JSON
-      isQueenDetectionComplete: Boolean
-    }
-
-    # Added type for varroa detection event
-    type VarroaDetectedEvent {
-      delta: JSON
-      isVarroaDetectionComplete: Boolean
-      varroaCount: Int
-    }
-
-    type BoxVarroaDetectedEvent {
-      fileId: String
-      boxId: String
-      varroaCount: Int
-      detections: JSON
-      isComplete: Boolean
-    }
-
-    # Removed QueenConfirmationEvent type
-    
-    type ApiaryEvent {
-      id: String
-      name: String
-    }
-  `,
+    typeDefs: gql`${subscriptionTypeDefs}`,
     resolvers: {
         Query: {
             hello: () => "Hello World!",
@@ -217,6 +152,10 @@ app.get(`/health`, (_, res) => {
 
 logger.info("⛲️ Listening on port 8300");
 app.listen(8300, () => {
+    registerSubscriptions().catch((error) => {
+        logger.errorEnriched("Subscription registry push failed", error, {});
+    });
+
     const wsServer = new WebSocketServer({
         port: 8350,
         path: "/graphql",
@@ -267,8 +206,18 @@ app.listen(8300, () => {
             },
 
             onSubscribe: (ctx, msg) => {
-                // if (!(await isTokenValid(ctx.connectionParams?.token)))
-                // return ctx.extra.socket.close(CloseCode.Forbidden, 'Forbidden');
+                const payload: any = (msg as any)?.payload || {};
+                publishSubscriptionUsage({
+                    query: payload.query,
+                    operationName: payload.operationName,
+                    connectionParams: (ctx as any)?.connectionParams as
+                        | Record<string, unknown>
+                        | undefined,
+                }).catch((error) => {
+                    logger.errorEnriched("Failed to record onSubscribe usage", error, {
+                        operationName: payload.operationName || null,
+                    });
+                });
             },
             onNext: (ctx, msg, args, result) => {
                 logger.debug("Next", {ctx, msg, args, result});
