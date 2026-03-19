@@ -27,8 +27,10 @@ type FrameResourcesDetectedEvent{
   isCellsDetectionComplete: Boolean
   frameSideId: String
   broodPercent: Int
+  droneBroodPercent: Int
   cappedBroodPercent: Int
   eggsPercent: Int
+  nectarPercent: Int
   pollenPercent: Int
   honeyPercent: Int
 }
