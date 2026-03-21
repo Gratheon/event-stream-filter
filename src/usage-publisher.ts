@@ -1,5 +1,6 @@
 import Redis from "ioredis";
 import { logger } from "./logger";
+import { instrumentRedisClient } from "./instrument-redis";
 
 const REDIS_CHANNEL = process.env.REDIS_QUERIES_CHANNEL || "graphql-queries";
 
@@ -10,7 +11,7 @@ function getPublisher() {
 		return publisher;
 	}
 
-	publisher = new Redis({
+	publisher = instrumentRedisClient(new Redis({
 		port: Number(process.env.REDIS_PORT || 6379),
 		host:
 			process.env.REDIS_HOST ||
@@ -19,7 +20,7 @@ function getPublisher() {
 		password: process.env.REDIS_SECRET || process.env.REDIS_PASSWORD || "pass",
 		lazyConnect: true,
 		maxRetriesPerRequest: 1,
-	});
+	}), "usage_publisher");
 
 	publisher.on("error", (error) => {
 		logger.error("Subscription usage redis publisher error", { error });
