@@ -1,9 +1,9 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
 import Redis from "ioredis";
+import { instrumentRedisClient } from "./instrument-redis";
 
-
-const redisPubSub = new RedisPubSub({
-	subscriber: new Redis({
+const subscriber = instrumentRedisClient(
+	new Redis({
 		port: 6379,
 		host: process.env.ENV_ID === "dev" ? "redis" : "127.0.0.1",
 		username: "default",
@@ -17,12 +17,22 @@ const redisPubSub = new RedisPubSub({
 			return Math.min(times * 500, 5000);
 		},
 	}),
-	publisher: new Redis({
+	"pubsub_subscriber"
+);
+
+const publisher = instrumentRedisClient(
+	new Redis({
 		port: 6379,
 		host: process.env.ENV_ID === "dev" ? "redis" :  "127.0.0.1",
 		username: "default",
 		password: "pass",
 	}),
+	"pubsub_publisher"
+);
+
+const redisPubSub = new RedisPubSub({
+	subscriber,
+	publisher,
 });
 
 export default redisPubSub
