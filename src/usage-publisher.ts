@@ -58,12 +58,22 @@ export async function publishSubscriptionUsage({
 	query,
 	operationName,
 	connectionParams,
+	eventType,
+	subscriptionName,
+	sampleRate,
+	sessionDurationMs,
+	transportedEvents,
 }: {
 	query?: string;
 	operationName?: string;
 	connectionParams?: Record<string, unknown>;
+	eventType: "subscription_start" | "subscription_end";
+	subscriptionName: string;
+	sampleRate: number;
+	sessionDurationMs?: number;
+	transportedEvents?: number;
 }) {
-	if (!query) {
+	if (!subscriptionName || sampleRate <= 0) {
 		return;
 	}
 
@@ -79,15 +89,43 @@ export async function publishSubscriptionUsage({
 			JSON.stringify({
 				query,
 				operationName: operationName || null,
+				subscriptionName,
 				timestamp: Date.now(),
-				headers: buildHeaders(connectionParams),
+				headers:
+					eventType === "subscription_start"
+						? buildHeaders(connectionParams)
+						: undefined,
 				transport: "websocket",
-				eventType: "subscription_start",
+				eventType,
+				sampleRate,
+				sessionDurationMs: Number.isFinite(sessionDurationMs)
+					? Math.max(0, Math.floor(Number(sessionDurationMs)))
+					: undefined,
+				transportedEvents: Number.isFinite(transportedEvents)
+					? Math.max(0, Math.floor(Number(transportedEvents)))
+					: undefined,
 			})
 		);
+
+		logger.info("Published subscription usage event", {
+			eventType,
+			subscriptionName,
+			operationName: operationName || null,
+			sampleRate,
+			sessionDurationMs:
+				Number.isFinite(sessionDurationMs) && sessionDurationMs !== undefined
+					? Math.max(0, Math.floor(Number(sessionDurationMs)))
+					: null,
+			transportedEvents:
+				Number.isFinite(transportedEvents) && transportedEvents !== undefined
+					? Math.max(0, Math.floor(Number(transportedEvents)))
+					: null,
+		});
 	} catch (error: any) {
 		logger.errorEnriched("Failed to publish subscription usage event", error, {
 			operationName: operationName || null,
+			subscriptionName,
+			eventType,
 		});
 	}
 }
