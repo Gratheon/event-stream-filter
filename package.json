@@ -10,13 +10,14 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "tsc --noEmit -p ./config/tsconfig.json",
-    "precommit": "npm run lint && npm run test -- --bail --findRelatedTests"
+    "precommit": "pnpm run lint && pnpm run test -- --bail --findRelatedTests"
   },
   "author": "",
   "license": "AGPL",
   "engines": {
     "node": ">=25.0.0"
   },
+  "packageManager": "pnpm@10.29.2",
   "dependencies": {
     "@graphql-tools/schema": "9.0.12",
     "@gratheon/log-lib": "^2.1.0",

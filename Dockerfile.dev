@@ -2,8 +2,8 @@ FROM platformatic/node-caged:25-slim
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm@10.29.2 && pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -11,4 +11,4 @@ EXPOSE 4000
 EXPOSE 8300
 EXPOSE 8350
 
-CMD ["npm", "start"]
+CMD ["pnpm", "run", "start"]
