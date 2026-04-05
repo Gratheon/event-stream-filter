@@ -9,7 +9,11 @@ services:
       - 8350:8350
     volumes:
       - .:/app/
+      - event-stream-filter-node-modules:/app/node_modules
     restart: always
     environment:
       - ENV_ID=dev
       - LOG_LEVEL=info
+
+volumes:
+  event-stream-filter-node-modules:
