@@ -1,11 +1,11 @@
-FROM platformatic/node-caged:25-slim
+FROM node:25-bookworm-slim
+
+ENV CI=true
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm@10.29.2 && pnpm install --frozen-lockfile
-
-COPY . .
+RUN npm install --global pnpm@10.29.2 && pnpm install --frozen-lockfile
 
 EXPOSE 4000
 EXPOSE 8300
