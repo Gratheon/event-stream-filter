@@ -20,7 +20,7 @@
   "packageManager": "pnpm@10.29.2",
   "dependencies": {
     "@graphql-tools/schema": "9.0.12",
-    "@gratheon/log-lib": "^2.1.0",
+    "@gratheon/log-lib": "4.1.2",
     "@sentry/node": "7.120.4",
     "express": "4.22.1",
     "express-graphql": "0.12.0",
