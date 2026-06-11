@@ -3,8 +3,8 @@
  * These ensure basic HTTP functionality works
  */
 
-import express from 'express';
-import request from 'supertest';
+import express = require('express');
+import request = require('supertest');
 
 describe('Health Check Endpoint', () => {
   let app: express.Application;
