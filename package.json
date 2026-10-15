@@ -15,7 +15,7 @@
   "author": "",
   "license": "AGPL",
   "engines": {
-    "node": ">=25.0.0"
+    "node": ">=26.0.0"
   },
   "packageManager": "pnpm@10.29.2",
   "dependencies": {
