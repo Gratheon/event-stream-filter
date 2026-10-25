@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run TypeScript type checking
+      - name: Lint and type check
         run: npm run lint
 
       - name: Run tests
