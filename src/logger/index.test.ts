@@ -68,8 +68,8 @@ describe('logger', () => {
   describe('debug', () => {
     it('should log debug messages when log level allows', () => {
       // Note: This test depends on LOG_LEVEL env var
-      logger.debug('Test debug message');
       // Debug logs might be filtered based on config
+      expect(() => logger.debug('Test debug message')).not.toThrow();
     });
   });
 });
